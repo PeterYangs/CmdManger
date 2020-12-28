@@ -8,7 +8,7 @@ while (true) {
 
     echo "success".PHP_EOL;
 
-//     sleep(1);
+    sleep(1);
 
     $index++;
 

@@ -54,7 +54,9 @@ func RunCmd(cmdLine string) {
 
 	sysType := runtime.GOOS
 
-	if sysType == "linux" {
+	//panic(sysType)
+
+	if sysType == "linux" || sysType == "darwin" {
 		// LINUX系统
 
 		cmd = exec.Command("bash", "-c", cmdLine)
