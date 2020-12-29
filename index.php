@@ -6,7 +6,7 @@ while (true) {
 
 
 
-    echo "success".PHP_EOL;
+    echo "success------------".$index.PHP_EOL;
 
     sleep(1);
 
