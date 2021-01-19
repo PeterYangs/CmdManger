@@ -21,7 +21,8 @@ type WriteErr struct {
 
 func (wc *WriteLog) Write(p []byte) (int, error) {
 
-	fmt.Print(string(p) + "---------log---------" + wc.Cmd)
+	//fmt.Print(string(p) + "---------log---------" + wc.Cmd)
+	fmt.Print(string(p))
 
 	n := len(p)
 
@@ -30,7 +31,8 @@ func (wc *WriteLog) Write(p []byte) (int, error) {
 
 func (wc *WriteErr) Write(p []byte) (int, error) {
 
-	fmt.Print(string(p) + "--------err----------" + wc.Cmd)
+	//fmt.Print(string(p) + "--------err----------" + wc.Cmd)
+	fmt.Print(string(p))
 
 	n := len(p)
 

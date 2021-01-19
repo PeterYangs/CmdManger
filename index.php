@@ -8,7 +8,7 @@ while (true) {
 
     echo "success------------".$index.PHP_EOL;
 
-    sleep(1);
+    sleep(mt_rand(1,3));
 
     $index++;
 
