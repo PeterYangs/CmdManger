@@ -3,14 +3,74 @@ package main
 import (
 	"cmdManger/cmd"
 	_ "cmdManger/cmd"
+	"cmdManger/global"
 	"encoding/json"
 	"github.com/PeterYangs/tools"
+	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 	"strconv"
 	_ "time"
 )
 
 func main() {
+
+	//fmt.Println(jsons.List[0]["name"])
+
+	//var _ []map[string]string
+
+	//fmt.Println(jsons["list"])
+
+	//list:=jsons["list"]
+	//
+	//lists:=list.([]map[string]interface{})
+	//
+	//
+	//fmt.Println(lists)
+
+	//list :=jsons["list"].([]map[string]string)
+	//
+	//fmt.Println(list)
+
+	//fmt.Println(jsons["list"][0])
+
+	//for i := 0; i < 10; i++ {
+	//
+	//	go func() {
+	//
+	//		cmd.Run("php index.php")
+	//
+	//	}()
+	//
+	//}
+	//
+	//time.Sleep(10 * time.Hour)
+
+	//启动脚本
+	go runCmd()
+
+	r := gin.Default()
+
+	r.Static("/static", "./static")
+
+	r.LoadHTMLGlob("templates/*")
+
+	r.GET("/status", func(c *gin.Context) {
+
+		c.HTML(http.StatusOK, "status.html", gin.H{})
+
+	})
+
+	r.GET("/getStatus", func(context *gin.Context) {
+
+		context.JSON(200, global.GlobalStatus)
+	})
+
+	r.Run()
+
+}
+
+func runCmd() {
 
 	data, err := tools.ReadFile("./config.json")
 
@@ -48,65 +108,23 @@ func main() {
 			panic("启动数量不能小于等于0")
 		}
 
+		global.GlobalLock.Lock()
+		global.GlobalStatus.CmdList = append(global.GlobalStatus.CmdList, map[string]string{"name": value["name"], "cmd": value["cmd"], "num": value["num"]})
+		global.GlobalLock.Unlock()
+
 		for i := 0; i < num; i++ {
 
 			go func() {
 
-				cmd.Run(value["cmd"])
+				//进程编号
+				//value["no"]=strconv.Itoa(i)
+
+				cmd.RunInit(value)
 
 			}()
 
 		}
 
 	}
-
-	for {
-
-	}
-
-	//fmt.Println(jsons.List[0]["name"])
-
-	//var _ []map[string]string
-
-	//fmt.Println(jsons["list"])
-
-	//list:=jsons["list"]
-	//
-	//lists:=list.([]map[string]interface{})
-	//
-	//
-	//fmt.Println(lists)
-
-	//list :=jsons["list"].([]map[string]string)
-	//
-	//fmt.Println(list)
-
-	//fmt.Println(jsons["list"][0])
-
-	//for i := 0; i < 10; i++ {
-	//
-	//	go func() {
-	//
-	//		cmd.Run("php index.php")
-	//
-	//	}()
-	//
-	//}
-	//
-	//time.Sleep(10 * time.Hour)
-
-	//r := gin.Default()
-	//
-	//r.Static("/static", "./static")
-	//
-	//r.LoadHTMLGlob("templates/*")
-	//
-	//r.GET("/status", func(c *gin.Context) {
-	//
-	//	c.HTML(http.StatusOK, "status.html", gin.H{})
-	//
-	//})
-	//
-	//r.Run()
 
 }

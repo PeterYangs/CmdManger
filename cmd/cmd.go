@@ -39,6 +39,12 @@ func (wc *WriteErr) Write(p []byte) (int, error) {
 	return n, nil
 }
 
+func RunInit(configLine map[string]string) {
+
+	Run(configLine["cmd"])
+
+}
+
 func Run(cmdLine string) {
 
 	for {

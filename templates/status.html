@@ -3,9 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="/static/vue.js" ></script>
+    <script src="/static/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>123</h1>
+
+<div id="app">
+
+    <el-table :data="statusData.CmdList" border style="width: 100%">
+        <el-table-column prop="name" label="名称">
+        </el-table-column>
+        <el-table-column prop="cmd" label="命令">
+        </el-table-column>
+
+        <el-table-column prop="num" label="进程数">
+        </el-table-column>
+
+        <el-table-column  label="操作">
+            <template v-solt="scope">
+
+                <el-button type="success">重启</el-button>
+                <el-button type="danger">停止</el-button>
+                <el-button >查看日志</el-button>
+
+            </template>
+        </el-table-column>
+
+
+    </el-table>
+
+</div>
+
+
 </body>
+
+<script>
+
+    new Vue({
+        el: "#app",
+        data: {
+
+            statusData: {}
+
+        },
+        methods: {
+
+            getStatus() {
+
+
+                axios.get('/getStatus')
+                    .then((response) => {
+                        console.log(response.data);
+
+                        this.statusData = response.data;
+
+                    })
+
+
+            }
+
+
+        },
+        created() {
+
+            this.getStatus();
+
+        }
+
+    });
+
+
+</script>
 </html>
