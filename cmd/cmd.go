@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/PeterYangs/tools"
 	"io"
 	"log"
 	"os/exec"
@@ -11,24 +12,31 @@ import (
 
 //命令输出日志
 type WriteLog struct {
-	Cmd string
+	Cmd  string
+	Name string
 }
 
 //命令报错日志
 type WriteErr struct {
-	Cmd string
+	Cmd  string
+	Name string
 }
 
+//日志输出回调
 func (wc *WriteLog) Write(p []byte) (int, error) {
 
 	//fmt.Print(string(p) + "---------log---------" + wc.Cmd)
 	fmt.Print(string(p))
+
+	//写入日志
+	tools.WriteLine("log/"+wc.Name+".log", string(p))
 
 	n := len(p)
 
 	return n, nil
 }
 
+//错误输出回调
 func (wc *WriteErr) Write(p []byte) (int, error) {
 
 	//fmt.Print(string(p) + "--------err----------" + wc.Cmd)
@@ -41,28 +49,30 @@ func (wc *WriteErr) Write(p []byte) (int, error) {
 
 func RunInit(configLine map[string]string) {
 
-	Run(configLine["cmd"])
+	//fmt.Println(configLine["name"])
+
+	Run(configLine["cmd"], configLine["name"])
 
 }
 
-func Run(cmdLine string) {
+func Run(cmdLine string, cmdName string) {
 
 	for {
 
-		RunCmd(cmdLine)
+		RunCmd(cmdLine, cmdName)
 	}
 
 }
 
-func RunCmd(cmdLine string) {
+func RunCmd(cmdLine string, cmdName string) {
+
+	//fmt.Println(cmdName)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 
 	var cmd *exec.Cmd
 
 	sysType := runtime.GOOS
-
-	//panic(sysType)
 
 	if sysType == "linux" || sysType == "darwin" {
 		// LINUX系统
@@ -93,40 +103,38 @@ func RunCmd(cmdLine string) {
 
 	stdout := io.Writer(&stdoutBuf)
 	stderr := io.Writer(&stderrBuf)
+	//运行命令
 	err := cmd.Start()
 	if err != nil {
 		log.Fatalf("cmd.Start() failed with '%s'\n", err)
 	}
+
+	//获取命令输出
 	go func() {
 		counter := &WriteLog{}
-		//将当前命令传递过去
+		//将当前命令和名称传递过去
 		counter.Cmd = cmdLine
+		counter.Name = cmdName
+
+		//fmt.Println(cmdName)
 
 		_, errStdout = io.Copy(stdout, io.TeeReader(stdoutIn, counter))
 
 	}()
+
+	//获取命令错误输出
 	go func() {
 
 		counter := &WriteErr{}
-		//将当前命令传递过去
+		//将当前命令和名称传递过去
 		counter.Cmd = cmdLine
+		counter.Name = cmdName
 
 		_, errStderr = io.Copy(stderr, stderrIn)
 
 	}()
+
+	//等待命令执行
 	err = cmd.Wait()
-	//if err != nil {
-	//	log.Fatalf("cmd.Run() failed with %s\n", err)
-	//}
-	//if errStdout != nil || errStderr != nil {
-	//	log.Fatal("failed to capture stdout or stderr\n")
-	//}
-	//outStr, errStr := string(stdoutBuf.Bytes()), string(stderrBuf.Bytes())
-	//fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
-
-	//stdout.
-
-	//重新拉起
-	//RunCmd(cmdLine)
 
 }

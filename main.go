@@ -15,37 +15,6 @@ import (
 
 func main() {
 
-	//fmt.Println(jsons.List[0]["name"])
-
-	//var _ []map[string]string
-
-	//fmt.Println(jsons["list"])
-
-	//list:=jsons["list"]
-	//
-	//lists:=list.([]map[string]interface{})
-	//
-	//
-	//fmt.Println(lists)
-
-	//list :=jsons["list"].([]map[string]string)
-	//
-	//fmt.Println(list)
-
-	//fmt.Println(jsons["list"][0])
-
-	//for i := 0; i < 10; i++ {
-	//
-	//	go func() {
-	//
-	//		cmd.Run("php index.php")
-	//
-	//	}()
-	//
-	//}
-	//
-	//time.Sleep(10 * time.Hour)
-
 	//启动脚本
 	go runCmd()
 
@@ -114,14 +83,11 @@ func runCmd() {
 
 		for i := 0; i < num; i++ {
 
-			go func() {
+			go func(temp map[string]string) {
 
-				//进程编号
-				//value["no"]=strconv.Itoa(i)
+				cmd.RunInit(temp)
 
-				cmd.RunInit(value)
-
-			}()
+			}(value)
 
 		}
 
