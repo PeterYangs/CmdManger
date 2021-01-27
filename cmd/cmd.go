@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"cmdManger/global"
+	"context"
 	"fmt"
 	"github.com/PeterYangs/tools"
 	"io"
@@ -74,18 +76,36 @@ func RunCmd(cmdLine string, cmdName string) {
 
 	sysType := runtime.GOOS
 
-	if sysType == "linux" || sysType == "darwin" {
-		// LINUX系统
+	ctx, cancel := context.WithCancel(context.Background())
 
-		cmd = exec.Command("bash", "-c", cmdLine)
+	if sysType == "linux" || sysType == "darwin" {
+		// linux/mac系统
+
+		cmd = exec.CommandContext(ctx, "bash", "-c", cmdLine)
 	}
 
 	if sysType == "windows" {
 		// windows系统
 
-		cmd = exec.Command("cmd", "/c", cmdLine)
+		cmd = exec.CommandContext(ctx, "cmd", "/c", cmdLine)
 
 	}
+
+	global.GlobalLock.Lock()
+
+	tempMap := make(map[string][]context.CancelFunc)
+
+	if len(global.GlobalStatus.CancelFuncList) != 0 {
+
+		tempMap = global.GlobalStatus.CancelFuncList
+	}
+
+	tempMap[cmdName] = append(tempMap[cmdName], cancel)
+
+	global.GlobalStatus.CancelFuncList = tempMap
+
+	global.GlobalLock.Unlock()
+
 	//获取输出
 	stdoutIn, _ := cmd.StdoutPipe()
 	//获取报错输出
@@ -116,8 +136,6 @@ func RunCmd(cmdLine string, cmdName string) {
 		counter.Cmd = cmdLine
 		counter.Name = cmdName
 
-		//fmt.Println(cmdName)
-
 		_, errStdout = io.Copy(stdout, io.TeeReader(stdoutIn, counter))
 
 	}()
@@ -133,6 +151,14 @@ func RunCmd(cmdLine string, cmdName string) {
 		_, errStderr = io.Copy(stderr, stderrIn)
 
 	}()
+
+	//go func(cancelFunc context.CancelFunc) {
+	//
+	//	time.Sleep(time.Second*5)
+	//
+	//	cancelFunc()
+	//
+	//}(cancel)
 
 	//等待命令执行
 	err = cmd.Wait()

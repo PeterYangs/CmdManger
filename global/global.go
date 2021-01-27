@@ -1,10 +1,13 @@
 package global
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
 type Status struct {
-	CmdList []map[string]string //name: 123 cmd :123
-
+	CmdList        []map[string]string //name: 123 cmd :123
+	CancelFuncList map[string][]context.CancelFunc
 }
 
 //全局数据存储变量

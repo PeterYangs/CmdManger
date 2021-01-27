@@ -5,6 +5,7 @@ import (
 	_ "cmdManger/cmd"
 	"cmdManger/global"
 	"encoding/json"
+	"fmt"
 	"github.com/PeterYangs/tools"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -32,7 +33,14 @@ func main() {
 
 	r.GET("/getStatus", func(context *gin.Context) {
 
-		context.JSON(200, global.GlobalStatus)
+		context.JSON(200, global.GlobalStatus.CmdList)
+	})
+
+	r.GET("/printCancel", func(context *gin.Context) {
+
+		fmt.Println(global.GlobalStatus.CancelFuncList)
+
+		context.String(200, "123")
 	})
 
 	r.Run()
@@ -81,6 +89,7 @@ func runCmd() {
 		global.GlobalStatus.CmdList = append(global.GlobalStatus.CmdList, map[string]string{"name": value["name"], "cmd": value["cmd"], "num": value["num"]})
 		global.GlobalLock.Unlock()
 
+		//启动命令
 		for i := 0; i < num; i++ {
 
 			go func(temp map[string]string) {
