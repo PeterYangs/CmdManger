@@ -21,6 +21,8 @@ func main() {
 
 	r := gin.Default()
 
+	r.Delims("{[{", "}]}")
+
 	r.Static("/static", "./static")
 
 	r.LoadHTMLGlob("templates/*")
@@ -40,7 +42,46 @@ func main() {
 
 		fmt.Println(global.GlobalStatus.CancelFuncList)
 
-		context.String(200, "123")
+	})
+
+	//取消指定名称的进程
+	r.GET("/stopProcess", func(context *gin.Context) {
+
+		name, bools := context.GetQuery("name")
+
+		if bools != true {
+
+			context.JSON(200, gin.H{"code": 2, "msg": "no name"})
+
+			return
+
+		}
+
+		cmdItem := global.GetCmdListByName(name)
+
+		cmdItemTemp := *cmdItem
+
+		if cmdItemTemp == nil {
+
+			context.JSON(200, gin.H{"code": 2, "msg": "no match cmd"})
+
+			return
+		}
+
+		cmdItemTemp["status"] = global.Stop
+
+		cancelList := global.GlobalStatus.CancelFuncList[name]
+
+		for _, cancel := range cancelList {
+
+			c := *cancel
+
+			c()
+
+		}
+
+		context.JSON(200, gin.H{"code": 1, "msg": "success", "data": name})
+
 	})
 
 	r.Run()
@@ -86,7 +127,7 @@ func runCmd() {
 		}
 
 		global.GlobalLock.Lock()
-		global.GlobalStatus.CmdList = append(global.GlobalStatus.CmdList, map[string]string{"name": value["name"], "cmd": value["cmd"], "num": value["num"]})
+		global.GlobalStatus.CmdList = append(global.GlobalStatus.CmdList, map[string]string{"name": value["name"], "cmd": value["cmd"], "num": value["num"], "status": global.Success})
 		global.GlobalLock.Unlock()
 
 		//启动命令

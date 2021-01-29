@@ -61,6 +61,15 @@ func Run(cmdLine string, cmdName string) {
 
 	for {
 
+		item := global.GetCmdListByName(cmdName)
+
+		temp := *item
+
+		if temp["status"] != global.Success {
+
+			return
+		}
+
 		RunCmd(cmdLine, cmdName)
 	}
 
@@ -93,14 +102,14 @@ func RunCmd(cmdLine string, cmdName string) {
 
 	global.GlobalLock.Lock()
 
-	tempMap := make(map[string][]context.CancelFunc)
+	tempMap := make(map[string][]*context.CancelFunc)
 
 	if len(global.GlobalStatus.CancelFuncList) != 0 {
 
 		tempMap = global.GlobalStatus.CancelFuncList
 	}
 
-	tempMap[cmdName] = append(tempMap[cmdName], cancel)
+	tempMap[cmdName] = append(tempMap[cmdName], &cancel)
 
 	global.GlobalStatus.CancelFuncList = tempMap
 
