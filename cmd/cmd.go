@@ -10,6 +10,7 @@ import (
 	"log"
 	"os/exec"
 	"runtime"
+	"strconv"
 )
 
 //命令输出日志
@@ -171,5 +172,40 @@ func RunCmd(cmdLine string, cmdName string) {
 
 	//等待命令执行
 	err = cmd.Wait()
+
+}
+
+//通过名称启动进程
+func StartCmdByName(name string) {
+
+	item := global.GetCmdListByName(name)
+
+	//println((*item)["cmd"])
+
+	//cmdLine:=(*item)["cmd"]
+
+	cmdItemTemp := *item
+
+	if cmdItemTemp == nil {
+
+		//context.JSON(200, gin.H{"code": 2, "msg": "no match cmd"})
+
+		return
+	}
+
+	//设置状态为正常
+	cmdItemTemp["status"] = global.Success
+
+	num, _ := strconv.Atoi((*item)["num"])
+
+	for i := 0; i < num; i++ {
+
+		go func(temp map[string]string) {
+
+			RunInit(temp)
+
+		}(*item)
+
+	}
 
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"cmdManger/cmd"
-	_ "cmdManger/cmd"
 	"cmdManger/global"
 	"encoding/json"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	_ "time"
 )
 
 func main() {
@@ -57,6 +55,7 @@ func main() {
 
 		}
 
+		//修改进程状态
 		cmdItem := global.GetCmdListByName(name)
 
 		cmdItemTemp := *cmdItem
@@ -69,6 +68,48 @@ func main() {
 		}
 
 		cmdItemTemp["status"] = global.Stop
+
+		cancelList := global.GlobalStatus.CancelFuncList[name]
+
+		for _, cancel := range cancelList {
+
+			c := *cancel
+
+			c()
+
+		}
+
+		context.JSON(200, gin.H{"code": 1, "msg": "success", "data": name})
+
+	})
+
+	r.GET("/StartCmdByName", func(context *gin.Context) {
+
+		name, bools := context.GetQuery("name")
+
+		if bools != true {
+
+			context.JSON(200, gin.H{"code": 2, "msg": "no name"})
+
+			return
+
+		}
+
+		cmd.StartCmdByName(name)
+
+	})
+
+	r.GET("/reloadProcess", func(context *gin.Context) {
+
+		name, bools := context.GetQuery("name")
+
+		if bools != true {
+
+			context.JSON(200, gin.H{"code": 2, "msg": "no name"})
+
+			return
+
+		}
 
 		cancelList := global.GlobalStatus.CancelFuncList[name]
 

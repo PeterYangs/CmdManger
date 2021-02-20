@@ -35,8 +35,10 @@
         <el-table-column label="操作" width="300">
             <template slot-scope="scope">
 
-                <el-button type="success">重启</el-button>
-                <el-button type="danger" @click="stopProcess(scope.row)">停止</el-button>
+
+                <el-button type="success" v-if="scope.row.status==1" @click="reloadProcess(scope.row)">重启</el-button>
+                <el-button type="primary" v-if="scope.row.status==2"  @click="startProcess(scope.row)">启动</el-button>
+                <el-button type="danger"  v-if="scope.row.status==1" @click="stopProcess(scope.row)">停止</el-button>
                 <el-button>查看日志</el-button>
 
             </template>
@@ -83,6 +85,26 @@
 
                 axios.get("/stopProcess?name=" + item.name).then((re) => {
 
+
+                    this.getStatus();
+
+                })
+
+            },
+            startProcess(item){
+
+
+                axios.get("/StartCmdByName?name="+item.name).then((re)=>{
+
+                    this.getStatus();
+
+                })
+
+
+            },
+            reloadProcess(item){
+
+                axios.get("/reloadProcess?name="+item.name).then((re)=>{
 
                     this.getStatus();
 
